@@ -3,7 +3,7 @@
 ---
 
 [//]: # (Image References)
-[EKF-results]: ./EKF/plot.png
+[EKF-results]: ./EKF/myresult.png
 
 ## Assignment - EFK & Sensor Fusion Example
 TODO 모두 작성후 [`./run.py`] 실행 결과:
