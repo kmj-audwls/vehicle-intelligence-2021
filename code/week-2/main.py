@@ -58,6 +58,7 @@ if __name__ == '__main__':
     priors = initialize_priors(
         map_size, landmark_positions, position_stdev
     )
+    print("priors",priors)
 
     # Cycle through timesteps
     for t in range(len(observations)):
@@ -113,4 +114,5 @@ if __name__ == '__main__':
         fig, graph_animator.animate, blit=True, interval=1000, repeat=False,
         frames=len(graph)
     )
+    ani.save("myresult.gif")
     plt.show()
