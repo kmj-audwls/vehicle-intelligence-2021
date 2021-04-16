@@ -1,5 +1,6 @@
 import numpy as np
 from helpers import distance
+import copy
 
 class ParticleFilter:
     def __init__(self, num_particles):
@@ -93,12 +94,54 @@ class ParticleFilter:
         #    for all the observations.
         # 5. Update the particle's weight by the calculated probability.
 
-        pass
+        for particle in self.particles:
+
+            landmarks_in_range = []
+
+            for id, vertice in map_landmarks.items():
+                dist = distance(particle, vertice)
+
+                if dist < sensor_range:
+                    landmarks_in_range.append({'id' : id, 'x' : vertice['x'], 'y' : vertice['y']})
+
+            if len(landmarks_in_range) == 0:
+                continue
+
+            trans_observations = []
+
+            cos_theta = np.cos(particle['t'])
+            sin_theta = np.sin(particle['t'])
+
+            for ob_idx, observation in enumerate(observations):
+                trans_x = particle['x'] + observation['x']*cos_theta - observation['y']*sin_theta
+                trans_y = particle['y'] + observation['x']*sin_theta + observation['y']*cos_theta
+
+                trans_observations.append({'x' : trans_x, 'y' : trans_y})
+
+            ass = self.associate(landmarks_in_range, trans_observations)
+
+            particle['w'] = 1
+            if len(particle['assoc']) != 0:
+                particle['assoc'] = []
+
+            weight_i = 1
+
+            for trans_ob, ass_pt in list(zip(trans_observations, ass)):
+                trans_x = trans_ob['x']
+                trans_y = trans_ob['y']
+                ass_x = ass_pt['x']
+                ass_y = ass_pt['y']
+                sigma_x = std_landmark_x
+                sigma_y = std_landmark_y
+                weight_i *= 1 / (2 * np.pi * sigma_x * sigma_y) * np.exp(-0.5*(np.power((trans_x-ass_x)/sigma_x,2) + np.power((trans_y-ass_y)/sigma_y,2)))
+                weight_i += 1e-60
+                particle['assoc'].append(ass_pt['id'])
+
+            particle['w'] = weight_i
 
     # Resample particles with replacement with probability proportional to
     #   their weights.
     def resample(self):
-        return
         # TODO: Select (possibly with duplicates) the set of particles
         #       that captures the posteior belief distribution, by
         # 1. Drawing particle samples according to their weights.
@@ -107,8 +150,12 @@ class ParticleFilter:
         #    references to mutable objects in Python.
         # Finally, self.particles shall contain the newly drawn set of
         #   particles.
-
-        pass
+        new_particles = []
+        weight_list = [i['w'] for i in self.particles]
+        weight_list /= np.sum(weight_list)
+        generate_idx = np.random.choice(self.num_particles, self.num_particles, p = weight_list)
+        new_particles = [copy.deepcopy(self.particles[g_idx]) for g_idx in generate_idx]
+        self.particles = new_particles
 
     # Choose the particle with the highest weight (probability)
     def get_best_particle(self):
