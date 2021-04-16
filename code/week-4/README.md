@@ -10,7 +10,7 @@
 
 You will complete the implementation of a simple particle filter by writing the following two methods of `class ParticleFilter` defined in `particle_filter.py`:
 
-# This code was produced by referring https://github.com/GitHubChuanYu/T2Project3_ParticleFilterKidnappedVehicle.git
+### This code was produced by referring https://github.com/GitHubChuanYu/T2Project3_ParticleFilterKidnappedVehicle.git
 
 * `update_weights()`: For each particle in the sample set, calculate the probability of the set of observations based on a multi-variate Gaussian distribution.
 ~~~python
