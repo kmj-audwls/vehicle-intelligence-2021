@@ -89,7 +89,6 @@ class HybridAStar:
         # the heuristic function.
         while len(opened) > 0:
             # TODO: implement prioritized breadth-first search
-            # for the hybrid A* algorithm.
             opened.sort(key=lambda s : s['f'], reverse=True)
             curr = opened.pop()
             x, y = curr['x'], curr['y']
@@ -97,11 +96,19 @@ class HybridAStar:
                 self.final = curr
                 found = True
                 break
-
-            # Compute reachable new states and process each of them.
             next_states = self.expand(curr, goal)
-            for n in next_states:
-                pass
+            for state in next_states:
+                next_x = self.idx(state['x'])
+                next_y = self.idx(state['y'])
+                next_stack = self.theta_to_stack_num(state['t'])
+                if (0 <= state['x'] < grid.shape[0]) and (0 <= state['y'] < grid.shape[1]) and grid[(next_x, next_y)] == 0 and \
+                        self.closed[next_stack][next_x][next_y] == 0:
+                    if self.check_cross_obstacle(curr, state, grid):
+                        opened.append(state)
+                        self.closed[next_stack][next_x][next_y] = 1
+                        self.came_from[next_stack][next_x][next_y] = curr
+
+                        total_closed += 1
         else:
             # We weren't able to find a valid path; this does not necessarily
             # mean there is no feasible trajectory to reach the goal.
@@ -116,7 +123,7 @@ class HybridAStar:
         # given theta represented in radian. Note that the calculation
         # should partition 360 degrees (2 * PI rad) into different
         # cells whose number is given by NUM_THETA_CELLS.
-        return 0
+        return int(theta // (2 * np.pi / self.NUM_THETA_CELLS))
 
     # Calculate the index of the grid cell based on the vehicle's position.
     def idx(self, pos):
