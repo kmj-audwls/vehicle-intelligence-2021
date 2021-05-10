@@ -48,4 +48,4 @@ def testEKF(inputfilename):
     plot_2d(estimations, gt_values)
 
 if __name__ == '__main__':
-    testEKF('data.txt')
+    testEKF("data.txt")

@@ -30,13 +30,35 @@ class HybridAStar:
         next_states = []
 
         # Consider a discrete selection of steering angles.
-        for delta_t in []:
-            pass
+        for delta_t in range(self.omega_min, self.omega_max+1, self.omega_step):
             # TODO: implement the trajectory generation based on
             # a simple bicycle model.
             # Let theta2 be the vehicle's heading (in radian)
             # between 0 and 2 * PI.
             # Check validity and then add to the next_states list.
+            delta = np.pi / 180.0 * delta_t
+            omega = self.speed / self.length * np.tan(delta)
+
+            head_theta = theta + omega
+
+            if head_theta < 0:
+                head_theta += 2 * np.pi
+            elif head_theta > 2 * np.pi:
+                head_theta -= 2 * np.pi
+
+            post_x = x + self.speed * np.cos(theta)
+            post_y = y + self.speed * np.sin(theta)
+
+            if 0 <= self.idx(post_x) and self.idx(post_x) < self.dim[1] and 0 <= self.idx(post_y) and self.idx(post_y) < self.dim[2]:
+                post_f = g2 + self.heuristic(post_x, post_y, goal)
+                post_state = {
+                    'f': post_f,
+                    'g': g2,
+                    'x': post_x,
+                    'y': post_y,
+                    't': head_theta,
+                }
+                next_states.append(post_state)
 
         return next_states
 
@@ -104,7 +126,8 @@ class HybridAStar:
     # Implement a heuristic function to be used in the hybrid A* algorithm.
     def heuristic(self, x, y, goal):
         # TODO: implement a heuristic function.
-        return 0
+        dist = np.sqrt((goal[0] - x) * (goal[0] - x) + (goal[1] - y) * (goal[1] - y))
+        return dist
 
     # Reconstruct the path taken by the hybrid A* algorithm.
     def reconstruct_path(self, start, goal):

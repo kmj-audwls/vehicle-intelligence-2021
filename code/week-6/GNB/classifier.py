@@ -34,6 +34,26 @@ class GNB():
         for each class. Record them for later use in prediction.
         '''
         # TODO: implement code.
+        label = dict()
+
+        for idx in self.classes:
+            label[idx] = np.empty((4,0))
+
+        for x,y in zip(X,Y):
+            value = np.array([[x[0]], [(x[1] % 4)], [x[2]], [x[3]]])
+            label[y] = np.append(label[y], value, axis=1)
+
+        means = dict()
+        stddevs = dict()
+
+        for idx in self.classes:
+            class_array = np.array(label[idx])
+            means[idx] = np.mean(class_array, axis=1)
+            stddevs[idx] = np.std(class_array, axis=1)
+
+        self.means = means
+        self.stddevs = stddevs
+
 
     # Given an observation (s, s_dot, d, d_dot), predict which behaviour
     # the vehicle is going to take using GNB.
@@ -46,5 +66,24 @@ class GNB():
         Return the label for the highest conditional probability.
         '''
         # TODO: implement code.
-        return "keep"
+        probs = dict()
+
+        for idx in self.classes:
+            cur_prob = 1.0
+            # Multiply all the probabilities for variables
+            for idx2 in range(len(observation)):
+                cur_prob *= gaussian_prob(observation[idx2], self.means[idx][idx2], self.stddevs[idx][idx2])
+
+            probs[idx] = cur_prob
+
+        # Get hightest conditinal probability & label
+        prob = 0
+        predict_class = "keep"
+
+        for idx in self.classes:
+            if probs[idx] > prob:
+                prob = probs[idx]
+                predict_class = idx
+
+        return predict_class
 
